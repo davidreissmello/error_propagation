@@ -1,7 +1,7 @@
 from numpy import array
 from numpy import ndarray
 
-from error_propagation.complex import Complex
+from error_propagation.src.complex import Complex
 
 
 def arrays_to_complex(values: ndarray, errors: ndarray) -> ndarray:
@@ -18,9 +18,10 @@ def arrays_to_complex(values: ndarray, errors: ndarray) -> ndarray:
     return array(
         list(
             map(
-                lambda value_error_tuple:
-                Complex(value_error_tuple[0], value_error_tuple[1]),
+                lambda value_error_tuple: Complex(
+                    value_error_tuple[0], value_error_tuple[1]
+                ),
                 zip(values, errors),
-            ),
-        ),
+            )
+        )
     )
