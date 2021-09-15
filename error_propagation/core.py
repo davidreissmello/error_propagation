@@ -41,11 +41,17 @@ class Complex:
         new_error = sqrt(self.error ** 2 + other.error ** 2)
         return Complex(value=new_value, error=new_error)
 
+    def __radd__(self, other):
+        return self.__add__(other)
+
     def __sub__(self, other):
         other = check_complex_instance(other)
         new_value = self.value - other.value
         new_error = sqrt(self.error ** 2 + other.error ** 2)
         return Complex(value=new_value, error=new_error)
+
+    def __rsub__(self, other):
+        return self.__sub__(other)
 
     def __mul__(self, other):
         other = check_complex_instance(other)
@@ -54,6 +60,9 @@ class Complex:
             self.error ** 2 * other.value ** 2 + self.value ** 2 * other.error ** 2
         )
         return Complex(value=new_value, error=new_error)
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
 
     def __truediv__(self, other):
         other = check_complex_instance(other)
@@ -64,6 +73,9 @@ class Complex:
         )
         return Complex(value=new_value, error=new_error)
 
+    def __rtruediv__(self, other):
+        return self.__truediv__(other)
+
     def __pow__(self, power, modulo=None):
         power = check_complex_instance(power)
         if isinstance(power, np.ndarray):
@@ -73,6 +85,8 @@ class Complex:
             return np.array(results)
 
         return Complex(*self.pow(power))
+
+    # def __rpow__(self, other):
 
     def pow(self, power):
         new_value = self.value ** power.value
