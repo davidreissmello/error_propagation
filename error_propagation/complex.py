@@ -29,6 +29,9 @@ class Complex:
     def __str__(self):
         return f"{self.value} \u00B1 {self.error}"
 
+    def __repr__(self):
+        return self.__str__()
+
     def __eq__(self, other):
         return (self.value == other.value) and (self.error == other.error)
 
