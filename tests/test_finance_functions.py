@@ -1,7 +1,7 @@
 from math import isclose
 
-from error_propagation.complex import Complex
-from error_propagation.finance.npv import npv
+from error_propagation.src.complex import Complex
+from error_propagation.src.finance.npv import npv
 
 
 class TestFinancialFunctions:
