@@ -8,6 +8,5 @@ setup(
     author_email="davidreissmello@gmail.com",
     description="Package that computes error propagation",
     url="https://github.com/davidreissmello/error_propagation",
-    package_dir={"": "src"},
-    packages=find_packages(where="src"),
+    packages=find_packages(where=""),
 )
