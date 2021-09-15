@@ -12,7 +12,7 @@ repos:
     -   id: check-added-large-files
     -   id: check-yaml
     -   id: debug-statements
-    -   id: double-quote-string-fixer
+#    -   id: double-quote-string-fixer
     -   id: requirements-txt-fixer
 #-   repo: https://github.com/PyCQA/flake8
 #    rev: 3.9.2
@@ -33,11 +33,11 @@ repos:
     hooks:
     -   id: pyupgrade
         args: [--py36-plus]
--   repo: https://github.com/asottile/add-trailing-comma
-    rev: v2.1.0
-    hooks:
-    -   id: add-trailing-comma
-        args: [--py36-plus]
+#-   repo: https://github.com/asottile/add-trailing-comma
+#    rev: v2.1.0
+#    hooks:
+#    -   id: add-trailing-comma
+#        args: [--py36-plus]
 -   repo: https://github.com/asottile/setup-cfg-fmt
     rev: v1.17.0
     hooks:
