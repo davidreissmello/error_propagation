@@ -108,3 +108,26 @@ def check_complex_instance(value: Union[Complex, float]) -> Complex:
             return np.array(complex_list)
 
         return Complex(value=value, error=0)
+
+
+def arrays_to_complex(values: np.ndarray, errors: np.ndarray) -> np.ndarray:
+    """Convert array of values and array of errors to array of Complex
+
+    Args:
+        values: array of values
+        errors: array of errors
+
+    Returns:
+        array of complex values
+
+    """
+    return np.array(
+        list(
+            map(
+                lambda value_error_tuple: Complex(
+                    value_error_tuple[0], value_error_tuple[1]
+                ),
+                zip(values, errors),
+            )
+        )
+    )

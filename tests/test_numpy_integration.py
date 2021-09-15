@@ -1,6 +1,6 @@
 import numpy as np
 
-from error_propagation.complex import Complex
+from error_propagation.core import Complex
 
 
 class TestNumpyIntegration:

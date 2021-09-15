@@ -1,6 +1,6 @@
 from math import isclose
 
-from error_propagation.complex import Complex
+from error_propagation.core import Complex
 from error_propagation.finance.npv import npv
 
 
