@@ -17,10 +17,10 @@ class Complex:
             value: Value
             error: Standard deviation of value
         """
-        if not isinstance(value, float):
+        if not isinstance(value, Number):
             raise ValueError(f"Value {value} is not a number.")
 
-        if not isinstance(error, float):
+        if not isinstance(error, Number):
             raise ValueError(f"Value {error} is not a number.")
 
         self.value = value
