@@ -2,7 +2,8 @@ from math import log
 from math import sqrt
 from typing import List
 from typing import Tuple
-from typing import Union
+from typing import Union, Callable
+from numbers import Number
 
 import numpy as np
 
@@ -18,8 +19,13 @@ class Complex:
             value: Value
             error: Standard deviation of value
         """
-        self.value = value
-        self.error = error
+        if not isinstance(value, Number):
+            raise ValueError(f"Value {value} is not a float")
+        if not isinstance(error, Number):
+            raise ValueError(f"Error {value} is not a float")
+
+        self.value = float(value)
+        self.error = float(error)
 
     def __str__(self) -> str:
         return f"{self.value} \u00B1 {self.error}"
@@ -31,66 +37,37 @@ class Complex:
         return (self.value == other.value) and (self.error == other.error)
 
     def __add__(self, other: "Complex") -> "Complex":
-        try:
-            return self.add(self, other)
-        except AttributeError:
-            return self.add(self, Complex(other, 0))
-        except Exception as e:
-            raise e
+        return self._try_except_wrapper(self, other, self.add)
 
     def __radd__(self, other: "Complex") -> "Complex":
-        try:
-            return self.add(self, other)
-        except AttributeError:
-            return self.add(self, Complex(other, 0))
-        except Exception as e:
-            raise e
+        return self.__add__(other)
 
     def __sub__(self, other: "Complex") -> "Complex":
-        try:
-            return self.sub(self, other)
-        except AttributeError:
-            return self.sub(self, Complex(other, 0))
-        except Exception as e:
-            raise e
+        return self._try_except_wrapper(self, other, self.sub)
 
     def __rsub__(self, other: "Complex") -> "Complex":
-        try:
-            return self.sub(self, other)
-        except AttributeError:
-            return self.sub(self, Complex(other, 0))
-        except Exception as e:
-            raise e
+        return self.__sub__(other)
 
     def __mul__(self, other: "Complex") -> "Complex":
-        try:
-            return self.mul(self, other)
-        except AttributeError:
-            return self.mul(self, Complex(other, 0))
-        except Exception as e:
-            raise e
+        return self._try_except_wrapper(self, other, self.mul)
 
     def __rmul__(self, other: "Complex") -> "Complex":
-        try:
-            return self.mul(self, other)
-        except AttributeError:
-            return self.mul(self, Complex(other, 0))
-        except Exception as e:
-            raise e
+        return self.__mul__(other)
 
     def __truediv__(self, other: Union["Complex", float]) -> "Complex":
-        try:
-            return self.truediv(self, other)
-        except AttributeError:
-            return self.truediv(self, Complex(other, 0))
-        except Exception as e:
-            raise e
+        return self._try_except_wrapper(self, other, self.truediv)
 
     def __rtruediv__(self, other: Union["Complex", float]) -> "Complex":
+        return self.__truediv__(other)
+
+    @staticmethod
+    def _try_except_wrapper(
+        self: "Complex", other: "Complex", func: Callable
+    ) -> "Complex":
         try:
-            return self.truediv(self, other)
+            return func(self, other)
         except AttributeError:
-            return self.truediv(self, Complex(other, 0))
+            return func(self, Complex(other, 0))
         except Exception as e:
             raise e
 
