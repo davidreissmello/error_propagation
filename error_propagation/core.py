@@ -1,10 +1,39 @@
-from math import log
-from math import sqrt
+from math import log, sqrt
 from typing import List
-from typing import Tuple
-from typing import Union
-
+from typing import Union, Callable
+from numbers import Number
+import operator
 import numpy as np
+from functools import wraps
+
+
+def _try_except_wrapper(self: "Complex", other: "Complex", func: Callable):
+    try:
+        return func(self, other)
+    except AttributeError:
+        return func(self, Complex(other, 0))
+    except Exception as e:
+        raise e
+
+
+def _try_except_wrapper_comparison(self: "Complex", other: "Complex", func: Callable):
+    try:
+        return func(self.value, other.value)
+    except AttributeError:
+        return func(self.value, other)
+    except Exception as e:
+        raise e
+
+
+def ndarray_safe(func):
+    @wraps(func)
+    def ndarray_safe_wrapper(complex, target, *args, **kwargs):
+        if isinstance(target, np.ndarray):
+            complexlist = [func(complex, item, *args, **kwargs) for item in target]
+            return np.asarray(complexlist)
+        return func(complex, target, *args, **kwargs)
+
+    return ndarray_safe_wrapper
 
 
 class Complex:
@@ -18,8 +47,13 @@ class Complex:
             value: Value
             error: Standard deviation of value
         """
-        self.value = value
-        self.error = error
+        if not isinstance(value, Number):
+            raise ValueError(f"Value {value} is not a float")
+        if not isinstance(error, Number):
+            raise ValueError(f"Error {value} is not a float")
+
+        self.value = float(value)
+        self.error = abs(float(error))
 
     def __str__(self) -> str:
         return f"{self.value} \u00B1 {self.error}"
@@ -30,149 +64,156 @@ class Complex:
     def __eq__(self, other: "Complex") -> bool:
         return (self.value == other.value) and (self.error == other.error)
 
+    def __ne__(self, other: "Complex") -> bool:
+        return (self.value != other.value) or (self.error != other.error)
+
+    def __lt__(self, other: "Complex") -> bool:
+        return _try_except_wrapper_comparison(self, other, operator.lt)
+
+    def __le__(self, other: "Complex") -> bool:
+        return _try_except_wrapper_comparison(self, other, operator.le)
+
+    def __gt__(self, other: "Complex") -> bool:
+        return _try_except_wrapper_comparison(self, other, operator.gt)
+
+    def __ge__(self, other: "Complex") -> bool:
+        return _try_except_wrapper_comparison(self, other, operator.ge)
+
+    def __hash__(self) -> int:
+        return hash((self.value, self.error))
+
+    def __bool__(self) -> bool:
+        return True
+
+    @ndarray_safe
     def __add__(self, other: "Complex") -> "Complex":
-        try:
-            return self.add(self, other)
-        except AttributeError:
-            return self.add(self, Complex(other, 0))
-        except Exception as e:
-            raise e
+        return _try_except_wrapper(self, other, Complex.add)
 
     def __radd__(self, other: "Complex") -> "Complex":
-        try:
-            return self.add(self, other)
-        except AttributeError:
-            return self.add(self, Complex(other, 0))
-        except Exception as e:
-            raise e
+        return self.__add__(other)
 
+    def __iadd__(self, other: "Complex") -> "Complex":
+        return self.__add__(other)
+
+    @ndarray_safe
     def __sub__(self, other: "Complex") -> "Complex":
-        try:
-            return self.sub(self, other)
-        except AttributeError:
-            return self.sub(self, Complex(other, 0))
-        except Exception as e:
-            raise e
+        return _try_except_wrapper(self, other, Complex.sub)
 
     def __rsub__(self, other: "Complex") -> "Complex":
-        try:
-            return self.sub(self, other)
-        except AttributeError:
-            return self.sub(self, Complex(other, 0))
-        except Exception as e:
-            raise e
+        return self.__sub__(other)
 
+    def __isub__(self, other: "Complex") -> "Complex":
+        return self.__sub__(other)
+
+    @ndarray_safe
     def __mul__(self, other: "Complex") -> "Complex":
-        try:
-            return self.mul(self, other)
-        except AttributeError:
-            return self.mul(self, Complex(other, 0))
-        except Exception as e:
-            raise e
+        return _try_except_wrapper(self, other, Complex.mul)
 
     def __rmul__(self, other: "Complex") -> "Complex":
-        try:
-            return self.mul(self, other)
-        except AttributeError:
-            return self.mul(self, Complex(other, 0))
-        except Exception as e:
-            raise e
+        return self.__mul__(other)
 
+    def __imul__(self, other: "Complex") -> "Complex":
+        return self.__mul__(other)
+
+    @ndarray_safe
     def __truediv__(self, other: Union["Complex", float]) -> "Complex":
-        try:
-            return self.truediv(self, other)
-        except AttributeError:
-            return self.truediv(self, Complex(other, 0))
-        except Exception as e:
-            raise e
+        return _try_except_wrapper(self, other, Complex.truediv)
 
     def __rtruediv__(self, other: Union["Complex", float]) -> "Complex":
+        return self.__truediv__(other)
+
+    def __itruediv__(self, other: Union["Complex", float]) -> "Complex":
+        return self.__truediv__(other)
+
+    @ndarray_safe
+    def __pow__(
+        self, power: Union["Complex", List[float]]
+    ) -> Union["Complex", List["Complex"]]:
+        return _try_except_wrapper(self, power, Complex.pow)
+
+    @ndarray_safe
+    def __ipow__(self, other: "Complex") -> "Complex":
+        return _try_except_wrapper(self, other, Complex.pow)
+
+    def __rpow__(self, other):
         try:
-            return self.truediv(self, other)
+            return self.pow(self, other)
         except AttributeError:
-            return self.truediv(self, Complex(other, 0))
+            # same as _try_except_wrapper but inverted
+            return self.pow(Complex(other, 0), self)
         except Exception as e:
             raise e
 
-    def __pow__(
-        self, power: Union["Complex", float, List[float]], modulo=None
-    ) -> Union["Complex", List["Complex"]]:
-        power = check_complex_instance(power)
-        if isinstance(power, np.ndarray):
-            results = []
-            for p in power:
-                results.append(Complex(*self.pow(p)))
-            return np.array(results)
+    def __neg__(self) -> "Complex":
+        return Complex(-self.value, self.error)
 
-        return Complex(*self.pow(power))
+    def __pos__(self) -> "Complex":
+        return self
 
-    # def __rpow__(self, other):
+    def __abs__(self) -> "Complex":
+        return Complex(operator.abs(self.value), self.error)
 
     @staticmethod
-    def add(self: "Complex", other: "Complex") -> "Complex":
-        new_value = self.value + other.value
-        new_error = sqrt(self.error ** 2 + other.error ** 2)
+    def add(a: "Complex", b: "Complex") -> "Complex":
+        new_value = a.value + b.value
+        new_error = sqrt(a.error ** 2 + b.error ** 2)
         return Complex(new_value, new_error)
 
     @staticmethod
-    def sub(self: "Complex", other: "Complex") -> "Complex":
-        new_value = self.value - other.value
-        new_error = sqrt(self.error ** 2 + other.error ** 2)
+    def sub(a: "Complex", b: "Complex") -> "Complex":
+        new_value = a.value - b.value
+        new_error = sqrt(a.error ** 2 + b.error ** 2)
         return Complex(new_value, new_error)
 
     @staticmethod
-    def mul(self: "Complex", other: "Complex") -> "Complex":
-        new_value = self.value * other.value
+    def mul(a: "Complex", b: "Complex") -> "Complex":
+        new_value = a.value * b.value
+        new_error = sqrt(a.error ** 2 * b.value ** 2 + a.value ** 2 * b.error ** 2)
+        return Complex(new_value, new_error)
+
+    @staticmethod
+    def truediv(a: "Complex", b: "Complex") -> "Complex":
+        new_value = a.value / b.value
         new_error = sqrt(
-            self.error ** 2 * other.value ** 2 + self.value ** 2 * other.error ** 2
+            (a.value ** 2 * b.error ** 2) / (b.value ** 4)
+            + (a.error ** 2) / (b.value ** 2)
         )
         return Complex(new_value, new_error)
 
     @staticmethod
-    def truediv(self: "Complex", other: "Complex") -> "Complex":
-        new_value = self.value / other.value
-        new_error = sqrt(
-            (self.value ** 2 * other.error ** 2) / (other.value ** 4)
-            + (self.error ** 2) / (other.value ** 2)
-        )
-        return Complex(new_value, new_error)
+    def mono_operator(
+        value_fn: Callable[[float], float], error_fn: Callable[[float], float]
+    ) -> Callable[["Complex"], "Complex"]:
+        def call(a: "Complex") -> "Complex":
+            new_value = value_fn(a.value)
+            new_error = error_fn(a.error)
+            return Complex(new_value, new_error)
 
-    def pow(self, power: Union["Complex", float]) -> Tuple[float, float]:
-        new_value = self.value ** power.value
-        new_error = (
-            self.value ** (2 * power.value) * power.error ** 2 * log(self.value) ** 2
-        )
+        return call
+
+    @staticmethod
+    def binary_operator(
+        value_fn: Callable[[float, float], float],
+        error_fn: Callable[[float, float], float],
+    ) -> Callable[["Complex", "Complex"], "Complex"]:
+        def call(a: "Complex", b: "Complex") -> "Complex":
+            new_value = value_fn(a.value, b.value)
+            new_error = error_fn(a.error, b.error)
+            return Complex(new_value, new_error)
+
+        return call
+
+    @staticmethod
+    def pow(a, power: Union["Complex", float]) -> "Complex":
+        new_value = a.value ** power.value
+        new_error = a.value ** (2 * power.value) * power.error ** 2 * log(a.value) ** 2
         new_error += (
-            self.value ** (2 * power.value)
-            * (self.error ** 2 * power.value ** 2)
-            / (self.value ** 2)
+            a.value ** (2 * power.value)
+            * (a.error ** 2 * power.value ** 2)
+            / (a.value ** 2)
         )
         new_error = sqrt(new_error)
-        return new_value, new_error
-
-
-def check_complex_instance(
-    value: Union[Complex, float]
-) -> Union[Complex, List[Complex]]:
-    """If value is not Complex, creates complex number with error 0.
-
-    Args:
-        value: complex number of value
-
-    Returns:
-        complex number
-
-    """
-    if isinstance(value, Complex):
-        return value
-    else:
-        if isinstance(value, np.ndarray):
-            complex_list = []
-            for v in value:
-                complex_list.append(Complex(v, 0))
-            return np.array(complex_list)
-
-        return Complex(value=value, error=0)
+        return Complex(new_value, new_error)
 
 
 def arrays_to_complex(values: List[float], errors: List[float]) -> np.ndarray:

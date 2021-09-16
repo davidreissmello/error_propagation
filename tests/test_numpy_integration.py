@@ -16,3 +16,19 @@ class TestNumpyIntegration:
         expected_result = np.array([Complex(5, 5), Complex(18, 5)])
 
         assert all(result == expected_result)
+
+    def test_pow(self):
+        assert np.array([2, 3]) ** Complex(3, 3) is not None
+        assert np.array([2, 3]) ** np.array([Complex(3, 3), Complex(3, 3)]) is not None
+        assert (
+            np.array([Complex(3, 3), Complex(3, 3)])
+            ** np.array([Complex(3, 3), Complex(3, 3)])
+            is not None
+        )
+        assert np.array([Complex(3, 3), Complex(3, 3)]) ** np.array([3, 3]) is not None
+        assert np.array([Complex(3, 3), Complex(3, 3)]) ** 3 is not None
+
+    def test_add(self):
+        result = np.array([Complex(1, 2), Complex(4, 1)]) + 2
+        expected_result = np.array([Complex(3, 2), Complex(6, 1)])
+        assert (result == expected_result).all()

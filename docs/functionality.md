@@ -1,22 +1,5 @@
 # Error Propagation
 
-__Every number should have an error, even if it's 0.__
-
-To do so, we have created a python package that makes it easy to propagate errors when performing calculations. 
-
-    (10 ± 3) + (11 ± 4) != (21 ± 7) 
-
-To calculate the error when adding 2 numbers, the L2 norm must be calculated
-   
-    (10 ± 3) + (11 ± 4) != (21 ± (3 ** 2 + 4 ** 2) ** 0.5) == (21 ± 5)
-
-Calculating the error when multiplying, dividing, exponentiation is significantly harder, but 
-still important! Please checkout [this notebook](./docs/derivations.ipynb) for derivations of 
-error propagation formulas. 
-
-## How to use
-Create a Complex class instance: 
-
 #### Basic Functionality
 ```python
 from error_propagation import Complex
@@ -79,11 +62,37 @@ Complex.truediv(a, b) # 0.9090909090909091 ± 0.42855841859385696
 Complex.pow(a, b) # 100000000000.0 ± 978367874409.4901
 ```
 
+#### Create your own error propagation functions
+```python
+import math
+from error_propagation import Complex
 
-To see more examples, go to [docs/functionality.md](./docs/functionality.md) and the [tests](./tests)folder. 
+def test_binary_operator(self):
+    def value_f(x, y):
+        return math.sin(x) + y
 
-## How to install
-error-propagation is hosted on PyP
-```ssh
-pip install error-propagation
+    def error_f(x, y):
+        return 3 * x + 2 - y
+
+    a = Complex(1, 3)
+    b = Complex(3, 2)
+    bin_op = Complex.binary_operator(value_f, error_f)
+
+    result = bin_op(a, b)
+    expected_result = Complex(value_f(a.value, b.value), error_f(a.error, b.error))
+    assert result == expected_result
+
+def test_mono_operator(self):
+    def value_f(x):
+        return math.sin(x)
+
+    def error_f(x):
+        return math.cos(x) * 1.23 + 3
+
+    a = Complex(1, 3)
+    operator = Complex.mono_operator(value_f, error_f)
+
+    result = operator(a)
+    expected_result = Complex(value_f(a.value), error_f(a.error))
+    assert result == expected_result
 ```

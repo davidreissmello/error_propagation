@@ -1,29 +1,42 @@
 from math import log
 from math import sqrt
+import math
 
 from error_propagation.core import Complex
-
-
-class TestComplexClass:
-    def test_complex_class_creation(self):
-        assert Complex(value=3, error=1.2) is not None
-
-    # def test_complex_value_error_output(self):
-    #     """Check that inputs other than int or float return a value error"""
-    #     with pytest.raises(ValueError):
-    #         Complex(value="hello", error=3)
-    #
-    #     with pytest.raises(ValueError):
-    #         Complex(value=3, error="world")
-    #
-    #     with pytest.raises(ValueError):
-    #         Complex(value="hello", error="world")
 
 
 class TestOperations:
     def test_equality(self):
         assert Complex(1, 2) == Complex(1, 2)
         assert Complex(1, 2) != Complex(1, 3)
+
+    def test_not_equal(self):
+        assert not Complex(1, 1) != Complex(1, 1)
+        assert Complex(1, 1) != Complex(2, 1)
+        assert Complex(1, 1) != Complex(1, 2)
+        assert Complex(1, 1) != Complex(2, 2)
+
+    def test_less_than(self):
+        assert Complex(1, 3) < Complex(2, 2)
+
+    def test_less_than_or_equal(self):
+        assert Complex(1, 3) <= Complex(2, 3)
+        assert Complex(1, 3) <= Complex(1, 2)
+
+    def test_greater_than(self):
+        assert Complex(2, 2) > Complex(1, 3)
+
+    def test_greater_than_or_equal(self):
+        assert Complex(2, 2) >= Complex(1, 3)
+        assert Complex(2, 2) >= Complex(2, 3)
+
+    def test_hash(self):
+        assert {Complex(1, 1): Complex(1, 1)} is not None
+        assert hash(Complex(1, 1)) == hash(Complex(1, 1))
+        assert hash(Complex(1, 1)) != hash(Complex(1, 2))
+
+    def test_bool(self):
+        assert Complex(1, 1)
 
     def test_complex_non_complex_mixture(self):
         result = Complex(10, 3) + 5
@@ -75,3 +88,49 @@ class TestOperations:
         )
 
         assert result == Complex(a ** b, expected_error)
+
+    def test_binary_operator(self):
+        def value_f(x, y):
+            return math.sin(x) + y
+
+        def error_f(x, y):
+            return 3 * x + 2 - y
+
+        a = Complex(1, 3)
+        b = Complex(3, 2)
+        bin_op = Complex.binary_operator(value_f, error_f)
+
+        result = bin_op(a, b)
+        expected_result = Complex(value_f(a.value, b.value), error_f(a.error, b.error))
+        assert result == expected_result
+
+    def test_mono_operator(self):
+        def value_f(x):
+            return math.sin(x)
+
+        def error_f(x):
+            return math.cos(x) * 1.23 + 3
+
+        a = Complex(1, 3)
+        operator = Complex.mono_operator(value_f, error_f)
+
+        result = operator(a)
+        expected_result = Complex(value_f(a.value), error_f(a.error))
+        assert result == expected_result
+
+    def test_right_power(self):
+        a = 3
+        a_error = 0
+        b = 2
+        b_error = 5
+
+        result = 3 ** Complex(b, b_error)
+        expected_error = sqrt(
+            a ** (2 * b) * b_error ** 2 * log(a) ** 2
+            + (a ** (2 * b) * a_error ** 2 * b ** 2) / (a ** 2)
+        )
+
+        assert result == Complex(a ** b, expected_error)
+
+    def test_absolute(self):
+        assert abs(Complex(-1, 2)) == Complex(1, 2)
