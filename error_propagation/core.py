@@ -1,6 +1,7 @@
 from math import log
 from math import sqrt
-from numbers import Number
+from typing import List
+from typing import Tuple
 from typing import Union
 
 import numpy as np
@@ -10,73 +11,92 @@ class Complex:
     """Object to store value and error.
     The error should be the standard deviation of the value."""
 
-    def __init__(self, value, error):
+    def __init__(self, value: float, error: float):
         """
 
         Args:
             value: Value
             error: Standard deviation of value
         """
-        if not isinstance(value, Number):
-            raise ValueError(f"Value {value} is not a number.")
-
-        if not isinstance(error, Number):
-            raise ValueError(f"Value {error} is not a number.")
-
         self.value = value
         self.error = error
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.value} \u00B1 {self.error}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
-    def __eq__(self, other):
+    def __eq__(self, other: "Complex") -> bool:
         return (self.value == other.value) and (self.error == other.error)
 
-    def __add__(self, other):
-        other = check_complex_instance(other)
-        new_value = self.value + other.value
-        new_error = sqrt(self.error ** 2 + other.error ** 2)
-        return Complex(value=new_value, error=new_error)
+    def __add__(self, other: "Complex") -> "Complex":
+        try:
+            return self.add(self, other)
+        except AttributeError:
+            return self.add(self, Complex(other, 0))
+        except Exception as e:
+            raise e
 
-    def __radd__(self, other):
-        return self.__add__(other)
+    def __radd__(self, other: "Complex") -> "Complex":
+        try:
+            return self.add(self, other)
+        except AttributeError:
+            return self.add(self, Complex(other, 0))
+        except Exception as e:
+            raise e
 
-    def __sub__(self, other):
-        other = check_complex_instance(other)
-        new_value = self.value - other.value
-        new_error = sqrt(self.error ** 2 + other.error ** 2)
-        return Complex(value=new_value, error=new_error)
+    def __sub__(self, other: "Complex") -> "Complex":
+        try:
+            return self.sub(self, other)
+        except AttributeError:
+            return self.sub(self, Complex(other, 0))
+        except Exception as e:
+            raise e
 
-    def __rsub__(self, other):
-        return self.__sub__(other)
+    def __rsub__(self, other: "Complex") -> "Complex":
+        try:
+            return self.sub(self, other)
+        except AttributeError:
+            return self.sub(self, Complex(other, 0))
+        except Exception as e:
+            raise e
 
-    def __mul__(self, other):
-        other = check_complex_instance(other)
-        new_value = self.value * other.value
-        new_error = sqrt(
-            self.error ** 2 * other.value ** 2 + self.value ** 2 * other.error ** 2
-        )
-        return Complex(value=new_value, error=new_error)
+    def __mul__(self, other: "Complex") -> "Complex":
+        try:
+            return self.mul(self, other)
+        except AttributeError:
+            return self.mul(self, Complex(other, 0))
+        except Exception as e:
+            raise e
 
-    def __rmul__(self, other):
-        return self.__mul__(other)
+    def __rmul__(self, other: "Complex") -> "Complex":
+        try:
+            return self.mul(self, other)
+        except AttributeError:
+            return self.mul(self, Complex(other, 0))
+        except Exception as e:
+            raise e
 
-    def __truediv__(self, other):
-        other = check_complex_instance(other)
-        new_value = self.value / other.value
-        new_error = sqrt(
-            (self.value ** 2 * other.error ** 2) / (other.value ** 4)
-            + (self.error ** 2) / (other.value ** 2)
-        )
-        return Complex(value=new_value, error=new_error)
+    def __truediv__(self, other: Union["Complex", float]) -> "Complex":
+        try:
+            return self.truediv(self, other)
+        except AttributeError:
+            return self.truediv(self, Complex(other, 0))
+        except Exception as e:
+            raise e
 
-    def __rtruediv__(self, other):
-        return self.__truediv__(other)
+    def __rtruediv__(self, other: Union["Complex", float]) -> "Complex":
+        try:
+            return self.truediv(self, other)
+        except AttributeError:
+            return self.truediv(self, Complex(other, 0))
+        except Exception as e:
+            raise e
 
-    def __pow__(self, power, modulo=None):
+    def __pow__(
+        self, power: Union["Complex", float, List[float]], modulo=None
+    ) -> Union["Complex", List["Complex"]]:
         power = check_complex_instance(power)
         if isinstance(power, np.ndarray):
             results = []
@@ -88,7 +108,36 @@ class Complex:
 
     # def __rpow__(self, other):
 
-    def pow(self, power):
+    @staticmethod
+    def add(self: "Complex", other: "Complex") -> "Complex":
+        new_value = self.value + other.value
+        new_error = sqrt(self.error ** 2 + other.error ** 2)
+        return Complex(new_value, new_error)
+
+    @staticmethod
+    def sub(self: "Complex", other: "Complex") -> "Complex":
+        new_value = self.value - other.value
+        new_error = sqrt(self.error ** 2 + other.error ** 2)
+        return Complex(new_value, new_error)
+
+    @staticmethod
+    def mul(self: "Complex", other: "Complex") -> "Complex":
+        new_value = self.value * other.value
+        new_error = sqrt(
+            self.error ** 2 * other.value ** 2 + self.value ** 2 * other.error ** 2
+        )
+        return Complex(new_value, new_error)
+
+    @staticmethod
+    def truediv(self: "Complex", other: "Complex") -> "Complex":
+        new_value = self.value / other.value
+        new_error = sqrt(
+            (self.value ** 2 * other.error ** 2) / (other.value ** 4)
+            + (self.error ** 2) / (other.value ** 2)
+        )
+        return Complex(new_value, new_error)
+
+    def pow(self, power: Union["Complex", float]) -> Tuple[float, float]:
         new_value = self.value ** power.value
         new_error = (
             self.value ** (2 * power.value) * power.error ** 2 * log(self.value) ** 2
@@ -102,7 +151,9 @@ class Complex:
         return new_value, new_error
 
 
-def check_complex_instance(value: Union[Complex, float]) -> Complex:
+def check_complex_instance(
+    value: Union[Complex, float]
+) -> Union[Complex, List[Complex]]:
     """If value is not Complex, creates complex number with error 0.
 
     Args:
@@ -124,7 +175,7 @@ def check_complex_instance(value: Union[Complex, float]) -> Complex:
         return Complex(value=value, error=0)
 
 
-def arrays_to_complex(values: np.ndarray, errors: np.ndarray) -> np.ndarray:
+def arrays_to_complex(values: List[float], errors: List[float]) -> np.ndarray:
     """Convert array of values and array of errors to array of Complex
 
     Args:

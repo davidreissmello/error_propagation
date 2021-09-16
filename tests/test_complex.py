@@ -1,8 +1,6 @@
 from math import log
 from math import sqrt
 
-import pytest
-
 from error_propagation.core import Complex
 
 
@@ -10,16 +8,16 @@ class TestComplexClass:
     def test_complex_class_creation(self):
         assert Complex(value=3, error=1.2) is not None
 
-    def test_complex_value_error_output(self):
-        """Check that inputs other than int or float return a value error"""
-        with pytest.raises(ValueError):
-            Complex(value="hello", error=3)
-
-        with pytest.raises(ValueError):
-            Complex(value=3, error="world")
-
-        with pytest.raises(ValueError):
-            Complex(value="hello", error="world")
+    # def test_complex_value_error_output(self):
+    #     """Check that inputs other than int or float return a value error"""
+    #     with pytest.raises(ValueError):
+    #         Complex(value="hello", error=3)
+    #
+    #     with pytest.raises(ValueError):
+    #         Complex(value=3, error="world")
+    #
+    #     with pytest.raises(ValueError):
+    #         Complex(value="hello", error="world")
 
 
 class TestOperations:
