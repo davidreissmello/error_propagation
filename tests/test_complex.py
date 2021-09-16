@@ -9,6 +9,34 @@ class TestOperations:
         assert Complex(1, 2) == Complex(1, 2)
         assert Complex(1, 2) != Complex(1, 3)
 
+    def test_not_equal(self):
+        assert not Complex(1, 1) != Complex(1, 1)
+        assert Complex(1, 1) != Complex(2, 1)
+        assert Complex(1, 1) != Complex(1, 2)
+        assert Complex(1, 1) != Complex(2, 2)
+
+    def test_less_than(self):
+        assert Complex(1, 3) < Complex(2, 2)
+
+    def test_less_than_or_equal(self):
+        assert Complex(1, 3) <= Complex(2, 3)
+        assert Complex(1, 3) <= Complex(1, 2)
+
+    def test_greater_than(self):
+        assert Complex(2, 2) > Complex(1, 3)
+
+    def test_greater_than_or_equal(self):
+        assert Complex(2, 2) >= Complex(1, 3)
+        assert Complex(2, 2) >= Complex(2, 3)
+
+    def test_hash(self):
+        assert {Complex(1, 1): Complex(1, 1)} is not None
+        assert hash(Complex(1, 1)) == hash(Complex(1, 1))
+        assert hash(Complex(1, 1)) != hash(Complex(1, 2))
+
+    def test_bool(self):
+        assert Complex(1, 1)
+
     def test_complex_non_complex_mixture(self):
         result = Complex(10, 3) + 5
         assert result == Complex(15, 3)
@@ -73,3 +101,6 @@ class TestOperations:
         )
 
         assert result == Complex(a ** b, expected_error)
+
+    def test_absolute(self):
+        assert abs(Complex(-1, 2)) == Complex(1, 2)
