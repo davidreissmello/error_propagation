@@ -83,7 +83,7 @@ Complex.pow(a, b) # 100000000000.0 ± 978367874409.4901
 To see more examples, go to [docs/functionality.md](./docs/functionality.md) and the [tests](./tests)folder. 
 
 ## How to install
-error-propagation is hosted on PyP
+error-propagation is hosted on [PyPi](https://pypi.org/project/error-propagation)
 ```ssh
 pip install error-propagation
 ```
