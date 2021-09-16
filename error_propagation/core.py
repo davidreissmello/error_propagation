@@ -3,6 +3,7 @@ from math import sqrt
 from typing import List
 from typing import Tuple
 from typing import Union, Callable
+from numbers import Number
 
 import numpy as np
 
@@ -18,13 +19,13 @@ class Complex:
             value: Value
             error: Standard deviation of value
         """
-        if not isinstance(value, float):
+        if not isinstance(value, Number):
             raise ValueError(f"Value {value} is not a float")
-        if not isinstance(error, float):
-            raise ValueError(f"Value {value} is not a float")
+        if not isinstance(error, Number):
+            raise ValueError(f"Error {value} is not a float")
 
-        self.value = value
-        self.error = error
+        self.value = float(value)
+        self.error = float(error)
 
     def __str__(self) -> str:
         return f"{self.value} \u00B1 {self.error}"
