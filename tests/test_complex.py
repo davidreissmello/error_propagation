@@ -1,5 +1,6 @@
 from math import log
 from math import sqrt
+import math
 
 from error_propagation.core import Complex
 
@@ -59,3 +60,32 @@ class TestOperations:
         )
 
         assert result == Complex(a ** b, expected_error)
+
+    def test_binary_operator(self):
+        def value_f(x, y):
+            return math.sin(x) + y
+
+        def error_f(x, y):
+            return 3 * x + 2 - y
+
+        a = Complex(1, 3)
+        b = Complex(3, 2)
+        bin_op = Complex.binary_operator(value_f, error_f)
+
+        result = bin_op(a, b)
+        expected_result = Complex(value_f(a.value, b.value), error_f(a.error, b.error))
+        assert result == expected_result
+
+    def test_mono_operator(self):
+        def value_f(x):
+            return math.sin(x)
+
+        def error_f(x):
+            return math.cos(x) * 1.23 + 3
+
+        a = Complex(1, 3)
+        operator = Complex.mono_operator(value_f, error_f)
+
+        result = operator(a)
+        expected_result = Complex(value_f(a.value), error_f(a.error))
+        assert result == expected_result
