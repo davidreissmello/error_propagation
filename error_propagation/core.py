@@ -113,6 +113,29 @@ class Complex:
         )
         return Complex(new_value, new_error)
 
+    @staticmethod
+    def mono_operator(
+        value_fn: Callable[[float], float], error_fn: Callable[[float], float]
+    ) -> Callable[["Complex"], "Complex"]:
+        def call(a: "Complex") -> "Complex":
+            new_value = value_fn(a.value)
+            new_error = error_fn(a.error)
+            return Complex(new_value, new_error)
+
+        return call
+
+    @staticmethod
+    def binary_operator(
+        value_fn: Callable[[float, float], float],
+        error_fn: Callable[[float, float], float],
+    ) -> Callable[["Complex", "Complex"], "Complex"]:
+        def call(a: "Complex", b: "Complex") -> "Complex":
+            new_value = value_fn(a.value, b.value)
+            new_error = error_fn(a.error, b.error)
+            return Complex(new_value, new_error)
+
+        return call
+
     def pow(self, power: Union["Complex", float]) -> Tuple[float, float]:
         new_value = self.value ** power.value
         new_error = (
