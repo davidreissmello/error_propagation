@@ -18,13 +18,13 @@ class Complex:
             value: Value
             error: Standard deviation of value
         """
-        if not isinstance(value, float):
+        if not isinstance(value, float) and not isinstance(value, int):
             raise ValueError(f"Value {value} is not a float")
-        if not isinstance(error, float):
+        if not isinstance(error, float) and not isinstance(value, int):
             raise ValueError(f"Value {value} is not a float")
 
-        self.value = value
-        self.error = error
+        self.value = float(value)
+        self.error = float(error)
 
     def __str__(self) -> str:
         return f"{self.value} \u00B1 {self.error}"
