@@ -1,5 +1,4 @@
-from math import log
-from math import sqrt
+from math import log, sqrt
 from typing import List
 from typing import Union, Callable
 from numbers import Number
@@ -155,31 +154,29 @@ class Complex:
         return Complex(operator.abs(self.value), self.error)
 
     @staticmethod
-    def add(self: "Complex", other: "Complex") -> "Complex":
-        new_value = self.value + other.value
-        new_error = sqrt(self.error ** 2 + other.error ** 2)
+    def add(a: "Complex", b: "Complex") -> "Complex":
+        new_value = a.value + b.value
+        new_error = sqrt(a.error ** 2 + b.error ** 2)
         return Complex(new_value, new_error)
 
     @staticmethod
-    def sub(self: "Complex", other: "Complex") -> "Complex":
-        new_value = self.value - other.value
-        new_error = sqrt(self.error ** 2 + other.error ** 2)
+    def sub(a: "Complex", b: "Complex") -> "Complex":
+        new_value = a.value - b.value
+        new_error = sqrt(a.error ** 2 + b.error ** 2)
         return Complex(new_value, new_error)
 
     @staticmethod
-    def mul(self: "Complex", other: "Complex") -> "Complex":
-        new_value = self.value * other.value
+    def mul(a: "Complex", b: "Complex") -> "Complex":
+        new_value = a.value * b.value
+        new_error = sqrt(a.error ** 2 * b.value ** 2 + a.value ** 2 * b.error ** 2)
+        return Complex(new_value, new_error)
+
+    @staticmethod
+    def truediv(a: "Complex", b: "Complex") -> "Complex":
+        new_value = a.value / b.value
         new_error = sqrt(
-            self.error ** 2 * other.value ** 2 + self.value ** 2 * other.error ** 2
-        )
-        return Complex(new_value, new_error)
-
-    @staticmethod
-    def truediv(self: "Complex", other: "Complex") -> "Complex":
-        new_value = self.value / other.value
-        new_error = sqrt(
-            (self.value ** 2 * other.error ** 2) / (other.value ** 4)
-            + (self.error ** 2) / (other.value ** 2)
+            (a.value ** 2 * b.error ** 2) / (b.value ** 4)
+            + (a.error ** 2) / (b.value ** 2)
         )
         return Complex(new_value, new_error)
 
@@ -207,15 +204,13 @@ class Complex:
         return call
 
     @staticmethod
-    def pow(self, power: Union["Complex", float]) -> "Complex":
-        new_value = self.value ** power.value
-        new_error = (
-            self.value ** (2 * power.value) * power.error ** 2 * log(self.value) ** 2
-        )
+    def pow(a, power: Union["Complex", float]) -> "Complex":
+        new_value = a.value ** power.value
+        new_error = a.value ** (2 * power.value) * power.error ** 2 * log(a.value) ** 2
         new_error += (
-            self.value ** (2 * power.value)
-            * (self.error ** 2 * power.value ** 2)
-            / (self.value ** 2)
+            a.value ** (2 * power.value)
+            * (a.error ** 2 * power.value ** 2)
+            / (a.value ** 2)
         )
         new_error = sqrt(new_error)
         return Complex(new_value, new_error)
