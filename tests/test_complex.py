@@ -89,3 +89,17 @@ class TestOperations:
         result = operator(a)
         expected_result = Complex(value_f(a.value), error_f(a.error))
         assert result == expected_result
+
+    def test_right_power(self):
+        a = 3
+        a_error = 0
+        b = 2
+        b_error = 5
+
+        result = 3 ** Complex(b, b_error)
+        expected_error = sqrt(
+            a ** (2 * b) * b_error ** 2 * log(a) ** 2
+            + (a ** (2 * b) * a_error ** 2 * b ** 2) / (a ** 2)
+        )
+
+        assert result == Complex(a ** b, expected_error)

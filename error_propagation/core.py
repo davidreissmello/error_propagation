@@ -1,7 +1,6 @@
 from math import log
 from math import sqrt
 from typing import List
-from typing import Tuple
 from typing import Union, Callable
 from numbers import Number
 
@@ -60,6 +59,23 @@ class Complex:
     def __rtruediv__(self, other: Union["Complex", float]) -> "Complex":
         return self.__truediv__(other)
 
+    def __pow__(
+        self, power: Union["Complex", List[float]]
+    ) -> Union["Complex", List["Complex"]]:
+        if isinstance(power, np.ndarray):
+            return [self._try_except_wrapper(self, p, self.pow) for p in power]
+
+        return self._try_except_wrapper(self, power, self.pow)
+
+    def __rpow__(self, other):
+        try:
+            return self.pow(self, other)
+        except AttributeError:
+            # same as _try_except_wrapper but inverted
+            return self.pow(Complex(other, 0), self)
+        except Exception as e:
+            raise e
+
     @staticmethod
     def _try_except_wrapper(
         self: "Complex", other: "Complex", func: Callable
@@ -70,20 +86,6 @@ class Complex:
             return func(self, Complex(other, 0))
         except Exception as e:
             raise e
-
-    def __pow__(
-        self, power: Union["Complex", float, List[float]], modulo=None
-    ) -> Union["Complex", List["Complex"]]:
-        power = check_complex_instance(power)
-        if isinstance(power, np.ndarray):
-            results = []
-            for p in power:
-                results.append(Complex(*self.pow(p)))
-            return np.array(results)
-
-        return Complex(*self.pow(power))
-
-    # def __rpow__(self, other):
 
     @staticmethod
     def add(self: "Complex", other: "Complex") -> "Complex":
@@ -137,7 +139,8 @@ class Complex:
 
         return call
 
-    def pow(self, power: Union["Complex", float]) -> Tuple[float, float]:
+    @staticmethod
+    def pow(self, power: Union["Complex", float]) -> "Complex":
         new_value = self.value ** power.value
         new_error = (
             self.value ** (2 * power.value) * power.error ** 2 * log(self.value) ** 2
@@ -148,31 +151,7 @@ class Complex:
             / (self.value ** 2)
         )
         new_error = sqrt(new_error)
-        return new_value, new_error
-
-
-def check_complex_instance(
-    value: Union[Complex, float]
-) -> Union[Complex, List[Complex]]:
-    """If value is not Complex, creates complex number with error 0.
-
-    Args:
-        value: complex number of value
-
-    Returns:
-        complex number
-
-    """
-    if isinstance(value, Complex):
-        return value
-    else:
-        if isinstance(value, np.ndarray):
-            complex_list = []
-            for v in value:
-                complex_list.append(Complex(v, 0))
-            return np.array(complex_list)
-
-        return Complex(value=value, error=0)
+        return Complex(new_value, new_error)
 
 
 def arrays_to_complex(values: List[float], errors: List[float]) -> np.ndarray:
