@@ -87,7 +87,7 @@ class Complex:
 
     @ndarray_safe
     def __add__(self, other: "Complex") -> "Complex":
-        return _try_except_wrapper(self, other, self.add)
+        return _try_except_wrapper(self, other, Complex.add)
 
     def __radd__(self, other: "Complex") -> "Complex":
         return self.__add__(other)
@@ -97,7 +97,7 @@ class Complex:
 
     @ndarray_safe
     def __sub__(self, other: "Complex") -> "Complex":
-        return _try_except_wrapper(self, other, self.sub)
+        return _try_except_wrapper(self, other, Complex.sub)
 
     def __rsub__(self, other: "Complex") -> "Complex":
         return self.__sub__(other)
@@ -107,7 +107,7 @@ class Complex:
 
     @ndarray_safe
     def __mul__(self, other: "Complex") -> "Complex":
-        return _try_except_wrapper(self, other, self.mul)
+        return _try_except_wrapper(self, other, Complex.mul)
 
     def __rmul__(self, other: "Complex") -> "Complex":
         return self.__mul__(other)
@@ -117,7 +117,7 @@ class Complex:
 
     @ndarray_safe
     def __truediv__(self, other: Union["Complex", float]) -> "Complex":
-        return _try_except_wrapper(self, other, self.truediv)
+        return _try_except_wrapper(self, other, Complex.truediv)
 
     def __rtruediv__(self, other: Union["Complex", float]) -> "Complex":
         return self.__truediv__(other)
@@ -129,11 +129,11 @@ class Complex:
     def __pow__(
         self, power: Union["Complex", List[float]]
     ) -> Union["Complex", List["Complex"]]:
-        return _try_except_wrapper(self, power, self.pow)
+        return _try_except_wrapper(self, power, Complex.pow)
 
     @ndarray_safe
     def __ipow__(self, other: "Complex") -> "Complex":
-        return _try_except_wrapper(self, other, self.pow)
+        return _try_except_wrapper(self, other, Complex.pow)
 
     def __rpow__(self, other):
         try:
