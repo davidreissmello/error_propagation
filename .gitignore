@@ -130,3 +130,6 @@ dmypy.json
 .pyre/
 /.idea/dictionaries/davidreissmello.xml
 /.idea/codeStyles/codeStyleConfig.xml
+
+# vscode local files
+.vscode/
