@@ -5,6 +5,36 @@ from typing import Union, Callable
 from numbers import Number
 import operator
 import numpy as np
+from functools import wraps
+
+
+def _try_except_wrapper(self: "Complex", other: "Complex", func: Callable):
+    try:
+        return func(self, other)
+    except AttributeError:
+        return func(self, Complex(other, 0))
+    except Exception as e:
+        raise e
+
+
+def _try_except_wrapper_comparison(self: "Complex", other: "Complex", func: Callable):
+    try:
+        return func(self.value, other.value)
+    except AttributeError:
+        return func(self.value, other)
+    except Exception as e:
+        raise e
+
+
+def ndarray_safe(func):
+    @wraps(func)
+    def ndarray_safe_wrapper(complex, target, *args, **kwargs):
+        if isinstance(target, np.ndarray):
+            complexlist = [func(complex, item, *args, **kwargs) for item in target]
+            return np.asarray(complexlist)
+        return func(complex, target, *args, **kwargs)
+
+    return ndarray_safe_wrapper
 
 
 class Complex:
@@ -39,16 +69,16 @@ class Complex:
         return (self.value != other.value) or (self.error != other.error)
 
     def __lt__(self, other: "Complex") -> bool:
-        return self._try_except_wrapper_comparison(self, other, operator.lt)
+        return _try_except_wrapper_comparison(self, other, operator.lt)
 
     def __le__(self, other: "Complex") -> bool:
-        return self._try_except_wrapper_comparison(self, other, operator.le)
+        return _try_except_wrapper_comparison(self, other, operator.le)
 
     def __gt__(self, other: "Complex") -> bool:
-        return self._try_except_wrapper_comparison(self, other, operator.gt)
+        return _try_except_wrapper_comparison(self, other, operator.gt)
 
     def __ge__(self, other: "Complex") -> bool:
-        return self._try_except_wrapper_comparison(self, other, operator.ge)
+        return _try_except_wrapper_comparison(self, other, operator.ge)
 
     def __hash__(self) -> int:
         return hash((self.value, self.error))
@@ -56,8 +86,9 @@ class Complex:
     def __bool__(self) -> bool:
         return True
 
+    @ndarray_safe
     def __add__(self, other: "Complex") -> "Complex":
-        return self._try_except_wrapper(self, other, self.add)
+        return _try_except_wrapper(self, other, self.add)
 
     def __radd__(self, other: "Complex") -> "Complex":
         return self.__add__(other)
@@ -65,8 +96,9 @@ class Complex:
     def __iadd__(self, other: "Complex") -> "Complex":
         return self.__add__(other)
 
+    @ndarray_safe
     def __sub__(self, other: "Complex") -> "Complex":
-        return self._try_except_wrapper(self, other, self.sub)
+        return _try_except_wrapper(self, other, self.sub)
 
     def __rsub__(self, other: "Complex") -> "Complex":
         return self.__sub__(other)
@@ -74,8 +106,9 @@ class Complex:
     def __isub__(self, other: "Complex") -> "Complex":
         return self.__sub__(other)
 
+    @ndarray_safe
     def __mul__(self, other: "Complex") -> "Complex":
-        return self._try_except_wrapper(self, other, self.mul)
+        return _try_except_wrapper(self, other, self.mul)
 
     def __rmul__(self, other: "Complex") -> "Complex":
         return self.__mul__(other)
@@ -83,8 +116,9 @@ class Complex:
     def __imul__(self, other: "Complex") -> "Complex":
         return self.__mul__(other)
 
+    @ndarray_safe
     def __truediv__(self, other: Union["Complex", float]) -> "Complex":
-        return self._try_except_wrapper(self, other, self.truediv)
+        return _try_except_wrapper(self, other, self.truediv)
 
     def __rtruediv__(self, other: Union["Complex", float]) -> "Complex":
         return self.__truediv__(other)
@@ -92,16 +126,15 @@ class Complex:
     def __itruediv__(self, other: Union["Complex", float]) -> "Complex":
         return self.__truediv__(other)
 
+    @ndarray_safe
     def __pow__(
         self, power: Union["Complex", List[float]]
     ) -> Union["Complex", List["Complex"]]:
-        if isinstance(power, np.ndarray):
-            return [self._try_except_wrapper(self, p, self.pow) for p in power]
+        return _try_except_wrapper(self, power, self.pow)
 
-        return self._try_except_wrapper(self, power, self.pow)
-
+    @ndarray_safe
     def __ipow__(self, other: "Complex") -> "Complex":
-        return self._try_except_wrapper(self, other, self.pow)
+        return _try_except_wrapper(self, other, self.pow)
 
     def __rpow__(self, other):
         try:
@@ -120,26 +153,6 @@ class Complex:
 
     def __abs__(self) -> "Complex":
         return Complex(operator.abs(self.value), self.error)
-
-    @staticmethod
-    def _try_except_wrapper(self: "Complex", other: "Complex", func: Callable):
-        try:
-            return func(self, other)
-        except AttributeError:
-            return func(self, Complex(other, 0))
-        except Exception as e:
-            raise e
-
-    @staticmethod
-    def _try_except_wrapper_comparison(
-        self: "Complex", other: "Complex", func: Callable
-    ):
-        try:
-            return func(self.value, other.value)
-        except AttributeError:
-            return func(self.value, other)
-        except Exception as e:
-            raise e
 
     @staticmethod
     def add(self: "Complex", other: "Complex") -> "Complex":
