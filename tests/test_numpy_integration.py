@@ -27,3 +27,8 @@ class TestNumpyIntegration:
         )
         assert np.array([Complex(3, 3), Complex(3, 3)]) ** np.array([3, 3]) is not None
         assert np.array([Complex(3, 3), Complex(3, 3)]) ** 3 is not None
+
+    def test_add(self):
+        result = np.array([Complex(1, 2), Complex(4, 1)]) + 2
+        expected_result = np.array([Complex(3, 2), Complex(6, 1)])
+        assert (result == expected_result).all()
