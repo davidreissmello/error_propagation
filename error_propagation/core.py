@@ -38,17 +38,6 @@ class Complex:
     def __ne__(self, other: "Complex") -> bool:
         return (self.value != other.value) or (self.error != other.error)
 
-    @staticmethod
-    def _try_except_wrapper_comparison(
-        self: "Complex", other: "Complex", func: Callable
-    ):
-        try:
-            return func(self.value, other.value)
-        except AttributeError:
-            return func(self.value, other)
-        except Exception as e:
-            raise e
-
     def __lt__(self, other: "Complex") -> bool:
         return self._try_except_wrapper_comparison(self, other, operator.lt)
 
@@ -138,6 +127,17 @@ class Complex:
             return func(self, other)
         except AttributeError:
             return func(self, Complex(other, 0))
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def _try_except_wrapper_comparison(
+        self: "Complex", other: "Complex", func: Callable
+    ):
+        try:
+            return func(self.value, other.value)
+        except AttributeError:
+            return func(self.value, other)
         except Exception as e:
             raise e
 
