@@ -18,9 +18,9 @@ class Complex:
             value: Value
             error: Standard deviation of value
         """
-        if not isinstance(value, float) and not isinstance(value, int):
+        if not isinstance(value, float) or not isinstance(value, int):
             raise ValueError(f"Value {value} is not a float")
-        if not isinstance(error, float) and not isinstance(value, int):
+        if not isinstance(error, float) or not isinstance(value, int):
             raise ValueError(f"Value {value} is not a float")
 
         self.value = float(value)
