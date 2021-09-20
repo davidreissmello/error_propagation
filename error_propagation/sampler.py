@@ -1,4 +1,4 @@
-from functools import partial
+from functools import partial, wraps
 from typing import Callable, List, Any
 
 import numpy as np
@@ -107,6 +107,9 @@ class Sampler:
     def __str__(self):
         return f"{self.__distribution}: {self.mean()} \u00B1 {self.std()}"
 
+    def __repr__(self):
+        return str(self)
+
     def __add__(self, other):
         if isinstance(other, (int, float)):
             other = Sampler("constant", val=other)
@@ -161,3 +164,18 @@ class Sampler:
             return X_samples ** Y_samples
 
         return Sampler("composite", sample_fcn)
+
+    @staticmethod
+    def make_math_sampler_compatible(func):
+        @wraps(func)
+        def math_func_to_wrap(x):
+            if isinstance(x, (float, int)):
+                x = Sampler("constant", val=x)
+
+            def sample_fcn(size):
+                samples = x.sample(size=size)
+                return np.array([func(s) for s in samples])
+
+            return Sampler("composite", sample_fcn)
+
+        return math_func_to_wrap

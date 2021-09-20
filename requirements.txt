@@ -1,8 +1,9 @@
-numpy
-pandas
+numpy==1.21.2
+pandas==1.3.3
 
 # dev
-pre-commit
+pre-commit==2.15.0
+jupyter==1.0.0
 
 # test
-pytest
+pytest==6.2.5
