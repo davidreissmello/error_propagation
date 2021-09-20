@@ -117,3 +117,47 @@ class Sampler:
             return X_samples + Y_samples
 
         return Sampler("composite", sample_fcn)
+
+    def __sub__(self, other):
+        if isinstance(other, (int, float)):
+            other = Sampler("constant", val=other)
+
+        def sample_fcn(size):
+            X_samples = self.sample(size)
+            Y_samples = other.sample(size)
+            return X_samples - Y_samples
+
+        return Sampler("composite", sample_fcn)
+
+    def __mul__(self, other):
+        if isinstance(other, (int, float)):
+            other = Sampler("constant", val=other)
+
+        def sample_fcn(size):
+            X_samples = self.sample(size)
+            Y_samples = other.sample(size)
+            return X_samples * Y_samples
+
+        return Sampler("composite", sample_fcn)
+
+    def __true_div__(self, other):
+        if isinstance(other, (int, float)):
+            other = Sampler("constant", val=other)
+
+        def sample_fcn(size):
+            X_samples = self.sample(size)
+            Y_samples = other.sample(size)
+            return X_samples / Y_samples
+
+        return Sampler("composite", sample_fcn)
+
+    def __pow__(self, other):
+        if isinstance(other, (int, float)):
+            other = Sampler("constant", val=other)
+
+        def sample_fcn(size):
+            X_samples = self.sample(size)
+            Y_samples = other.sample(size)
+            return X_samples ** Y_samples
+
+        return Sampler("composite", sample_fcn)
