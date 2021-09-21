@@ -78,7 +78,7 @@ def radians(x):
 
 
 @Sampler.make_math_sampler_compatible
-def cosh(x):
+def acosh(x):
     return math.acosh(x)
 
 

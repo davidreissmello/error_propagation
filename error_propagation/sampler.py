@@ -1,5 +1,5 @@
 from functools import partial, wraps
-from typing import Callable, List, Any
+from typing import Callable, Tuple
 
 import numpy as np
 import numpy.random as rnd
@@ -14,6 +14,7 @@ class Sampler:
         "constant": lambda N, val: val * np.ones(N),
         "uniform": rnd.uniform,
         "normal": rnd.normal,
+        "lognormal": rnd.lognormal,
         "choice": rnd.choice,
         "bernoulli": partial(rnd.choice, [True, False]),
         "binomial": rnd.binomial,
@@ -40,11 +41,10 @@ class Sampler:
 
         if distribution == "composite":
             self.__sample_fcn = sample_fcn
-            return
-
-        self.__sample_fcn = partial(
-            Sampler.IMPLEMENTED_DISTRIBUTIONS[distribution], *args, **kwargs
-        )
+        else:
+            self.__sample_fcn = partial(
+                Sampler.IMPLEMENTED_DISTRIBUTIONS[distribution], *args, **kwargs
+            )
 
     def sample(self, size: int) -> np.array:
         """Extracts N samples from random variable
@@ -164,6 +164,15 @@ class Sampler:
             return X_samples ** Y_samples
 
         return Sampler("composite", sample_fcn)
+
+    def probability(self, interval: Tuple, size: int = 10000):
+        if interval[0] >= interval[1]:
+            raise ValueError(
+                f"Interval is undefined. We need interval=(a, b) with a < b, but "
+                f"instead we got interval=({interval[0]:.1f}, {interval[1]:.1f})."
+            )
+        samples = self.sample(size=size)
+        return ((interval[0] < samples) & (samples < interval[1])).sum() / size
 
     @staticmethod
     def make_math_sampler_compatible(func):
